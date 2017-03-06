@@ -5,7 +5,7 @@ $(document).ready(function () {
 
   /**---------- Event Handling ----------**/
   /** Save New Treat **/
-  $('#saveNewButton').on('click', function(event) {
+  $('#saveNewButton').on('submit', function() {
     event.preventDefault();
 
     var treateName = $('#treatNameInput').val();
@@ -18,7 +18,7 @@ $(document).ready(function () {
       url: treateURL
     };
 
-    postTreat(newTreat);
+    // postTreat(newTreat);
   });
 
   /**---------- AJAX Functions ----------**/
@@ -26,38 +26,44 @@ $(document).ready(function () {
   // GET /treats
   function getTreats() {
     $.ajax({
-      method: 'GET',
-      url: '/treats',
-    })
-    .done(function (treatArray) {
-      console.log('GET /treats returned ', treatArray);
+      type: 'GET',
+      url: '/treats/',
+      success: function(response) {
+      console.log('GET /treats returned ', response);
+      console.log(response);
+      $('#treats').empty();
+        for (var i = 0; i < response.length; i++) {
+          var currentTreat = response[i];
+          var $newTreat = $('<div>');
+          $newTreat.data('id', currentTreat.id);
+          $newTreat.append('<div>' + currentTreat.name + '</div>');
 
-      $.each(treatArray, function (index, treat) {
-        appendTreat(treat);
-      });
-    });
-  }
+          $newTreat.append('<div>' + currentTreat.name + '</div>');
+          $('#treat-display').append($newTreat);
+      };
+    }
+  })
+};
 
-  // POST /treats
+
   function postTreat(treat) {
     $.ajax({
-      method: 'POST',
-      url: '/treats',
-      data: treat,
-    })
-    .done(function () {
-      console.log('POST /treats sent ', treat);
+      type: 'POST',
+      url: '/treats/new',
+      data: newTreat,
+      success:function () {
+      console.log('POST /treats sent ', newTreat);
       clearDom();
       getTreats();
-    });
-  }
-
+    }
+  })
+}
   /** ---------- DOM Functions ----------**/
 
-  function clearDom() {
+  var clearDom = function() {
     var $treats = $('#treat-display');
     $treats.empty();
-  }
+  };
 
   function appendTreat(treat) {
     // append a treat to the DOM and add data attributes
@@ -90,5 +96,6 @@ $(document).ready(function () {
     $treat.data('id', treat.id);
 
     $('.treat:last-of-type').append($treat);
-  }
+
+  };
 });
